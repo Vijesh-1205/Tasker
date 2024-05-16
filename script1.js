@@ -45,7 +45,6 @@ function saveTask(task) {
     tasks.push(task);
     localStorage.setItem('tasks', JSON.stringify(tasks));
 }
-
 function renderTasks() {
     let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     tasks.forEach(task => renderTask(task));
@@ -124,24 +123,27 @@ function renderTask(task) {
 }
 function Check() {
     var checkButtons = document.querySelectorAll('.check');
-    checkButtons.forEach(function(checkButton) {
+    checkButtons.forEach(function(checkButton, index) { // Adding index parameter
         checkButton.addEventListener('click', function() {
             var taskNameElement = this.closest('.middle').querySelector('h5');
             var tasks = JSON.parse(localStorage.getItem('tasks'));
-            var taskName = taskNameElement.textContent;
             if (this.checked) {
                 taskNameElement.style.textDecoration = "line-through";
                 taskNameElement.style.color = "grey";
-                task.completed = true;
+                tasks[index].completed = true; // Using index to access the task
+                localStorage.setItem('tasks', JSON.stringify(tasks));
             } else {
                 taskNameElement.style.textDecoration = "none";
                 taskNameElement.style.color = "black";
-                task.completed = false;
+                tasks[index].completed = false; // Using index to access the task
+                localStorage.setItem('tasks', JSON.stringify(tasks));
             }
-            localStorage.setItem('tasks', JSON.stringify(tasks));
+
         });
     });
 }
+
+
 
 function addDeleteEventListener() {
     var deleteIcons = document.querySelectorAll('.delete');
@@ -225,6 +227,10 @@ document.querySelector('.left-1').addEventListener('click', () => {
         NameEle.textContent="All Tasks"
     })
 })
+
+var stor = JSON.parse(localStorage.getItem("display"));
+var abc = document.getElementById('usernameDisplay');
+abc.innerHTML=stor.name
 
 
 
