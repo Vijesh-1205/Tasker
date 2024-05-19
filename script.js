@@ -18,7 +18,7 @@ document.querySelector('.signup button').addEventListener("click", function () {
         alert("All fields are required");
         return;
     }
-    var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
     if (!emailPattern.test(emails)) {
         result.innerHTML = "Enter a valid email address";
         return;
@@ -83,4 +83,3 @@ document.querySelector('.box button').addEventListener("click", function () {
         window.location.href = "home.html";
     }
 });
-
