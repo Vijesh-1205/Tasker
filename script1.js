@@ -1,15 +1,11 @@
-//category popup
+// Category popup
 var Categoryy = document.querySelector('.left-2');
 var CategoryyPopup = document.querySelector('.popup');
 Categoryy.addEventListener("click", function() {
-    if (CategoryyPopup.style.display == "block") {
-        CategoryyPopup.style.display = "none";
-    } else {
-        CategoryyPopup.style.display = "block";
-    }
+    CategoryyPopup.style.display = (CategoryyPopup.style.display == "block") ? "none" : "block";
 });
 
-//add and cancel task popup
+// Add and cancel task popup
 var AddTaskButton = document.querySelector('.add-task');
 var CancelTaskButton = document.querySelector('.Task-cancel');
 AddTaskButton.addEventListener("click", function() {
@@ -17,12 +13,10 @@ AddTaskButton.addEventListener("click", function() {
     TaskPopup.style.display = "block";
 });
 CancelTaskButton.addEventListener("click", function() {
-    console.log("Cancel Task button clicked!");
     var TaskPopup = document.querySelector('.task-popup');
     TaskPopup.style.display = "none";
 });
 
-//adding task
 var TaskAddButton = document.querySelector('.Task-add');
 TaskAddButton.addEventListener("click", function() {
     var taskName = document.querySelector('.task-popup input[type="text"]').value;
@@ -30,6 +24,7 @@ TaskAddButton.addEventListener("click", function() {
     var selectedCategory = categorySelect.options[categorySelect.selectedIndex].text;
 
     var newTask = {
+        id: Date.now(), 
         name: taskName,
         category: selectedCategory,
         completed: false
@@ -44,9 +39,12 @@ TaskAddButton.addEventListener("click", function() {
     categorySelect.selectedIndex = 0;
     document.querySelector('.task-popup').style.display = "none";
 });
+
+
 function renderTask(task) {
     var newTask = document.createElement('div');
     newTask.classList.add('middle');
+    newTask.dataset.id = task.id; // Set task ID as data attribute
 
     var checkboxContainer = document.createElement('div');
     checkboxContainer.classList.add('flex-1');
@@ -76,20 +74,6 @@ function renderTask(task) {
     ImgCateg.appendChild(categoryImage);
     ImgCateg.appendChild(categoryNameElement);
 
-    function getCategoryImage(category) {
-        if (category === "None") {
-            return "images/1.webp"
-        } else if (category === "Home") {
-            return "images/2.jpg"
-        } else if (category === "School") {
-            return "images/3.jfif";
-        } else if (category === "Shopping list") {
-            return"images/4.png";
-        } else {
-            return "";
-        }
-    }
-
     taskInfoContainer.appendChild(taskNameElement);
     taskInfoContainer.appendChild(ImgCateg);
 
@@ -114,30 +98,98 @@ function renderTask(task) {
 
     DeleteTask();
     Check();
+    editTask();
 }
+
+
 function Check() {
     var checkButtons = document.querySelectorAll('.check');
-    checkButtons.forEach(function(checkButton, index) { // Adding index parameter
-        checkButton.addEventListener('click', () => {
+    checkButtons.forEach(function(checkButton, index) { 
+        checkButton.addEventListener('click', function() {
             var taskNameElement = this.closest('.middle').querySelector('h5');
             var tasks = JSON.parse(localStorage.getItem('tasks'));
             if (this.checked) {
                 taskNameElement.style.textDecoration = "line-through";
                 taskNameElement.style.color = "grey";
-                tasks[index].completed = true; // Using index to access the task
+                tasks[index].completed = true; 
                 localStorage.setItem('tasks', JSON.stringify(tasks));
-            }else {
+            } else {
                 taskNameElement.style.textDecoration = "none";
                 taskNameElement.style.color = "black";
-                tasks[index].completed = false; // Using index to access the task
+                tasks[index].completed = false; 
                 localStorage.setItem('tasks', JSON.stringify(tasks));
             }
+        });
+    });
+}
 
+// Edit task
+function editTask() {
+    var editIcons = document.querySelectorAll('.edit');
+    editIcons.forEach(function(editIcon) {
+        editIcon.addEventListener("click", function() {
+            var parentTask = editIcon.closest('.middle');
+            var taskNameElement = parentTask.querySelector('h5');
+            var taskCategoryElement = parentTask.querySelector('.middle-flex p');
+            var taskId = parentTask.dataset.id; // Use dataset to store task ID
+
+            var editTaskPopup = document.querySelector('.edit-task');
+            var editNameInput = editTaskPopup.querySelector('input[type="text"]');
+            var editCategorySelect = editTaskPopup.querySelector('select');
+
+            // Set current task details in edit popup
+            editNameInput.value = taskNameElement.textContent;
+            editCategorySelect.value = taskCategoryElement.textContent;
+
+            editTaskPopup.style.display = "block";
+
+            //editing
+            var editButton = editTaskPopup.querySelector('.edit-add');
+            editButton.onclick = function() {
+                var updatedTaskName = editNameInput.value;
+                var updatedCategory = editCategorySelect.value;
+
+                // Update the task in the DOM
+                taskNameElement.textContent = updatedTaskName;
+                taskCategoryElement.textContent = updatedCategory;
+                taskCategoryElement.previousSibling.src = getCategoryImage(updatedCategory);
+
+                // Update the task in local storage
+                let tasks = JSON.parse(localStorage.getItem('tasks'));
+                let taskIndex = tasks.findIndex(task => task.id == taskId);
+                if (taskIndex !== -1) {
+                    tasks[taskIndex].name = updatedTaskName;
+                    tasks[taskIndex].category = updatedCategory;
+                    localStorage.setItem('tasks', JSON.stringify(tasks));
+                }
+
+                editTaskPopup.style.display = "none";
+            };
+
+            //cancel the edit
+            var cancelButton = editTaskPopup.querySelector('.edit-cancel');
+            cancelButton.onclick = function() {
+                editTaskPopup.style.display = "none";
+            };
         });
     });
 }
 
 
+//function to get category image
+function getCategoryImage(category) {
+    if (category === "None") {
+        return "images/1.webp";
+    } else if (category === "Home") {
+        return "images/2.jpg";
+    } else if (category === "School") {
+        return "images/3.jfif";
+    } else if (category === "Shopping list") {
+        return "images/4.png";
+    } else {
+        return "";
+    }
+}
 
 function DeleteTask() {
     var deleteIcons = document.querySelectorAll('.delete');
@@ -158,17 +210,19 @@ function DeleteTask() {
         });
     });
 }
+
 var cancelTaskPopup = document.querySelector('.delete-cancel');
 cancelTaskPopup.addEventListener("click", function() {
     var deleteTaskPopup = document.querySelector('.delete-task');
     deleteTaskPopup.style.display = "none";
 });
-//filter tasks
+
+// Filter tasks
 var filterButtons = document.querySelectorAll('.top-1-right button');
 filterButtons.forEach(function(button) {
     button.addEventListener('click', function() {
         var filterType = this.textContent;
-        updateTaskStatus(filterType)
+        updateTaskStatus(filterType);
         var tasks = document.querySelectorAll('.middle');
         tasks.forEach(function(task) {
             var taskNameElement = task.querySelector('h5');
@@ -180,16 +234,18 @@ filterButtons.forEach(function(button) {
         });
     });
 });
+
 function updateTaskStatus(status) {
     var nameEle = document.querySelector('.top h1');
     nameEle.textContent = status + " Tasks";
 }
-//filter category
+
+// Filter category
 var categoryItems = document.querySelectorAll('#popup-list li');
 categoryItems.forEach(function(categoryItem) {
     categoryItem.addEventListener('click', function() {
         var selectedCategory = categoryItem.querySelector('p').textContent;
-        CategoryStatus(selectedCategory)
+        CategoryStatus(selectedCategory);
         var tasks = document.querySelectorAll('.middle');
         tasks.forEach(function(task) {
             var taskCategoryElement = task.querySelector('.middle-flex p');
@@ -201,28 +257,28 @@ categoryItems.forEach(function(categoryItem) {
         });
     });
 });
+
 function CategoryStatus(status) {
     var nameEle = document.querySelector('.top h1');
     nameEle.textContent = status;
 }
 
-// clicking on "Tasks"
+// Clicking on "Tasks"
 document.querySelector('.left-1').addEventListener('click', () => {
     var tasks = document.querySelectorAll('.middle');
     tasks.forEach(function(task) {
         var NameEle = document.querySelector('.top h1');
-        task.style.display='flex'
-        NameEle.textContent="All Tasks"
-    })
-})
+        task.style.display = 'flex';
+        NameEle.textContent = "All Tasks";
+    });
+});
 
-//displaying username
+// Displaying username
 var storedName = JSON.parse(localStorage.getItem("display"));
 var username = document.getElementById('usernameDisplay');
-username.innerHTML=storedName.name
+username.innerHTML = storedName.name;
 
-document.addEventListener("DOMContentLoaded", renderTasks);
-function renderTasks() {
+document.addEventListener("DOMContentLoaded", () => {
     let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     tasks.forEach(task => renderTask(task));
-}
+});
